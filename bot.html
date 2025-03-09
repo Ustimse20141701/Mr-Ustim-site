@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Крестики-нолики</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        .board { display: grid; grid-template-columns: repeat(3, 100px); grid-gap: 5px; justify-content: center; margin-top: 20px; }
+        .cell { width: 100px; height: 100px; font-size: 36px; display: flex; align-items: center; justify-content: center; background: #ddd; cursor: pointer; }
+        .cell.taken { cursor: not-allowed; }
+        #status { font-size: 24px; margin-top: 20px; }
+        button { margin-top: 20px; font-size: 18px; padding: 10px 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>Крестики-нолики</h1>
+    <div id="status">Твой ход!</div>
+    <div class="board" id="board"></div>
+    <button onclick="resetGame()">🔄 Начать заново</button>
+
+    <script>
+        const board = document.getElementById("board");
+        const status = document.getElementById("status");
+        let cells = [];
+        let gameOver = false;
+
+        // Создаем игровое поле
+        function createBoard() {
+            board.innerHTML = "";
+            cells = [];
+            for (let i = 0; i < 9; i++) {
+                let cell = document.createElement("div");
+                cell.classList.add("cell");
+                cell.dataset.index = i;
+                cell.addEventListener("click", playerMove);
+                board.appendChild(cell);
+                cells.push(cell);
+            }
+        }
+
+        // Проверка победителя
+        function checkWinner(player) {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Горизонтали
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Вертикали
+                [0, 4, 8], [2, 4, 6] // Диагонали
+            ];
+            return winPatterns.some(pattern => pattern.every(i => cells[i].textContent === player));
+        }
+
+        // Ход игрока
+        function playerMove(event) {
+            if (gameOver) return;
+            let cell = event.target;
+            if (!cell.textContent) {
+                cell.textContent = "X";
+                cell.classList.add("taken");
+                if (checkWinner("X")) {
+                    status.textContent = "🎉 Ты победил!";
+                    gameOver = true;
+                    return;
+                }
+                if (cells.every(cell => cell.textContent)) {
+                    status.textContent = "🤝 Ничья!";
+                    gameOver = true;
+                    return;
+                }
+                status.textContent = "Ход компьютера...";
+                setTimeout(computerMove, 500);
+            }
+        }
+
+        // Ход компьютера
+        function computerMove() {
+            if (gameOver) return;
+            let emptyCells = cells.filter(cell => !cell.textContent);
+            if (emptyCells.length > 0) {
+                let randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                randomCell.textContent = "O";
+                randomCell.classList.add("taken");
+                if (checkWinner("O")) {
+                    status.textContent = "💻 Компьютер победил!";
+                    gameOver = true;
+                    return;
+                }
+                if (cells.every(cell => cell.textContent)) {
+                    status.textContent = "🤝 Ничья!";
+                    gameOver = true;
+                    return;
+                }
+                status.textContent = "Твой ход!";
+            }
+        }
+
+        // Сброс игры
+        function resetGame() {
+            gameOver = false;
+            status.textContent = "Твой ход!";
+            createBoard();
+        }
+
+        // Запуск игры
+        createBoard();
+    </script>
+
+</body>
+<button><a href="game menu.html">Back</a></button>
+</html>
